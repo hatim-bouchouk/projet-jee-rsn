@@ -118,7 +118,7 @@ The model layer consists of JPA entities that map to database tables:
 @Entity
 @Table(name = "users")
 public class User implements Serializable {
-    public enum Role { ADMIN, MANAGER, USER }
+    public enum Role { ADMIN, MANAGER, CLIENT }
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -186,7 +186,7 @@ Similarly structured entities exist for all database tables, with appropriate JP
 
 ## Service Layer
 
-The service layer implements business logic and coordinates operations across multiple DAOs:
+The service layer implements business logic using EJB stateless session beans with transaction management:
 
 ### Service Interfaces
 
@@ -194,8 +194,37 @@ The service layer implements business logic and coordinates operations across mu
 - **ProductService**: Product catalog and inventory management
 - **SupplierService**: Supplier management and product sourcing
 - **OrderService**: Order processing for both customer and supplier orders
-- **InventoryService**: Stock level management and movement tracking
-- **ReportService**: Analytical reports and business intelligence
+- **StockService**: Stock level management and movement tracking
+- **DashboardService**: Analytical reports and business intelligence
+
+### Service Exceptions
+
+The service layer includes a structured exception hierarchy:
+
+```java
+// Base exception for all service layer exceptions
+public class ServiceException extends Exception {
+    public ServiceException(String message) { super(message); }
+    public ServiceException(String message, Throwable cause) { super(message, cause); }
+}
+
+// Specific exception for validation errors
+public class ValidationException extends ServiceException {
+    private Map<String, String> validationErrors;
+    
+    public ValidationException(String message) { super(message); }
+    public ValidationException(String field, String message) {
+        super("Validation error");
+        this.validationErrors = new HashMap<>();
+        this.validationErrors.put(field, message);
+    }
+}
+
+// Specific exception for authentication errors
+public class AuthenticationException extends ServiceException {
+    public AuthenticationException(String message) { super(message); }
+}
+```
 
 ### Service Implementation
 
@@ -210,24 +239,82 @@ public class ProductServiceImpl implements ProductService {
     @Inject
     private StockDao stockDao;
     
-    @Inject
-    private SupplierProductDao supplierProductDao;
+    @Transactional
+    @Override
+    public Product createProduct(Product product) throws ValidationException {
+        // Input validation
+        validateProduct(product);
+        
+        // Business logic
+        product.setCreatedAt(LocalDateTime.now());
+        
+        // Persistence
+        Product savedProduct = productDao.save(product);
+        
+        // Initialize stock if needed
+        if (savedProduct.getStock() == null) {
+            Stock stock = new Stock();
+            stock.setProduct(savedProduct);
+            stock.setQuantity(0);
+            stockDao.save(stock);
+        }
+        
+        return savedProduct;
+    }
     
-    // Implementation of business methods...
+    // Other business methods...
 }
 ```
 
+### Key Service Features
+
+1. **Transaction Management**: 
+   - Container-managed transactions with @Transactional annotations
+   - Support for transaction rollback on exceptions
+
+2. **Input Validation**:
+   - Comprehensive validation of all service inputs
+   - Detailed validation error reporting
+
+3. **Exception Handling**:
+   - Structured exception hierarchy
+   - Meaningful exception messages for client feedback
+
+4. **Security Integration**:
+   - Authorization checks for sensitive operations
+   - Auditing and logging of critical actions
+
+5. **Business Logic**:
+   - Implementation of complex business rules
+   - Coordination across multiple related entities
+
 ## Controller Layer
 
-The controller layer consists of servlets that handle HTTP requests:
+The controller layer consists of servlets that handle HTTP requests and security filters:
 
-- **AuthenticationServlet**: Handles login/logout
+### Core Controllers
 - **ProductController**: Manages product catalog operations
 - **SupplierController**: Manages supplier operations
 - **OrderController**: Processes customer orders
 - **PurchaseOrderController**: Manages supplier orders
-- **InventoryController**: Handles inventory operations
-- **ReportController**: Generates reports
+- **StockController**: Handles inventory operations
+- **DashboardController**: Presents system metrics and analytics
+
+### Security Controllers
+- **LoginServlet**: Handles user authentication with form-based login
+- **LogoutServlet**: Manages secure user logout
+- **AccessDeniedServlet**: Customized handling of unauthorized access attempts
+
+### Security Filters
+- **AuthenticationFilter**: Intercepts requests to enforce authentication and role-based access control
+- **CsrfFilter**: Protects against Cross-Site Request Forgery by validating tokens on state-changing requests
+
+### Common Controller Features
+- Input validation with appropriate error handling
+- Transaction management via service layer
+- Response formatting for different view types (HTML, JSON)
+- Error handling with user-friendly messages
+- Audit logging for critical operations
 
 ## Presentation Layer
 
@@ -245,13 +332,98 @@ The presentation layer uses JSP with JSTL, along with CSS and JavaScript:
 
 ## Security Features
 
-The application implements several security features:
+The application implements a comprehensive security framework:
 
-- Role-based access control (ADMIN, MANAGER, USER)
-- Form-based authentication
-- Password hashing with bcrypt
-- Input validation and sanitization
-- Protection against common web vulnerabilities (XSS, CSRF)
+### Authentication and Authorization
+- **Role-based access control** with three roles: ADMIN, MANAGER, CLIENT
+- **Permission-based authorization** with granular permissions (e.g., product:view, product:edit)
+- **Form-based authentication** with secure session management
+- **Password hashing** with BCrypt for secure credential storage
+- **Session management** with security features such as session timeout and protection against session fixation
+- **Access control filters** for protecting application resources
+- **CSRF protection** for preventing cross-site request forgery attacks
+
+### Security Components
+
+#### User Principal
+A security model representing authenticated users with role and permission information:
+```java
+public class UserPrincipal implements Serializable {
+    private Integer id;
+    private String username;
+    private String email;
+    private Set<String> roles;
+    private Set<String> permissions;
+    private LocalDateTime lastActivity;
+    private String sessionId;
+    
+    // Methods for role and permission checks
+    public boolean hasRole(String role) { ... }
+    public boolean hasPermission(String permission) { ... }
+    public boolean hasAnyRole(String... roleList) { ... }
+}
+```
+
+#### Session Manager
+Handles secure session management for authenticated users:
+```java
+public class SessionManager {
+    // Create a new session for authenticated user
+    public static UserPrincipal createSession(HttpServletRequest request, 
+        HttpServletResponse response, User user) { ... }
+    
+    // Get current authenticated user
+    public static UserPrincipal getCurrentUser(HttpServletRequest request) { ... }
+    
+    // Validate CSRF token
+    public static boolean validateCsrfToken(HttpServletRequest request, String token) { ... }
+}
+```
+
+#### Authentication Filter
+Servlet filter for authentication and authorization:
+```java
+@WebFilter(filterName = "AuthenticationFilter", urlPatterns = {"/*"})
+public class AuthenticationFilter implements Filter {
+    // Intercept requests and validate user authentication and authorization
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) { ... }
+}
+```
+
+#### CSRF Protection
+Implements Cross-Site Request Forgery protection:
+```java
+@WebFilter(filterName = "CsrfFilter", urlPatterns = {"/*"})
+public class CsrfFilter implements Filter {
+    // Validate CSRF token for state-changing requests
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) { ... }
+}
+```
+
+#### Custom JSP Security Tag
+Tag library for conditional rendering based on user roles and permissions:
+```xml
+<security:authorize hasRole="ADMIN">
+    <!-- Only visible to admins -->
+</security:authorize>
+
+<security:authorize hasPermission="product:edit">
+    <!-- Only visible to users with product:edit permission -->
+</security:authorize>
+```
+
+#### Login and Access Control Servlets
+- **LoginServlet**: Handles user authentication
+- **LogoutServlet**: Handles user logout
+- **AccessDeniedServlet**: Handles unauthorized access attempts
+
+### Security Best Practices
+- Input validation and sanitization to prevent injection attacks
+- Protection against common web vulnerabilities (XSS, CSRF, Session Hijacking)
+- Secure password policies and storage
+- Audit logging for security events
+- Session timeout for inactive users
+- Secure HTTP response headers
 
 ## Main Functionality
 
