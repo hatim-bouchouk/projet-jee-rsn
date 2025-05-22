@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
+             version="2.2">
+    
+    <persistence-unit name="scmPU" transaction-type="JTA">
+        <description>Supply Chain Management Persistence Unit</description>
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <jta-data-source>java:jboss/datasources/MySQLDS</jta-data-source>
+        
+        <!-- Entity classes -->
+        <class>com.scm.model.User</class>
+        <class>com.scm.model.Product</class>
+        <class>com.scm.model.Supplier</class>
+        <class>com.scm.model.Stock</class>
+        <class>com.scm.model.SupplierProduct</class>
+        <class>com.scm.model.CustomerOrder</class>
+        <class>com.scm.model.OrderItem</class>
+        <class>com.scm.model.SupplierOrder</class>
+        <class>com.scm.model.SupplierOrderItem</class>
+        <class>com.scm.model.StockMovement</class>
+        
+        <properties>
+            <!-- Database connection settings -->
+            <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver" />
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/scm_db?useSSL=false&amp;serverTimezone=UTC" />
+            <property name="jakarta.persistence.jdbc.user" value="scm_user" />
+            <property name="jakarta.persistence.jdbc.password" value="scm_password" />
+            
+            <!-- Schema generation -->
+            <property name="jakarta.persistence.schema-generation.database.action" value="none" />
+            
+            <!-- Hibernate specific properties -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect" />
+            <property name="hibernate.show_sql" value="true" />
+            <property name="hibernate.format_sql" value="true" />
+            <property name="hibernate.hbm2ddl.auto" value="validate" />
+            
+            <!-- Connection pooling properties -->
+            <property name="hibernate.connection.provider_class" value="org.hibernate.hikaricp.internal.HikariCPConnectionProvider" />
+            <property name="hibernate.hikari.minimumIdle" value="5" />
+            <property name="hibernate.hikari.maximumPoolSize" value="10" />
+            <property name="hibernate.hikari.idleTimeout" value="30000" />
+            <property name="hibernate.hikari.connectionTimeout" value="30000" />
+            
+            <!-- Cache settings -->
+            <property name="hibernate.cache.use_second_level_cache" value="true" />
+            <property name="hibernate.cache.use_query_cache" value="true" />
+            <property name="hibernate.cache.region.factory_class" value="org.hibernate.cache.jcache.JCacheRegionFactory" />
+            
+            <!-- Statistics and debugging -->
+            <property name="hibernate.generate_statistics" value="true" />
+        </properties>
+    </persistence-unit>
+</persistence> 
