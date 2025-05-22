@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taglib version="2.1" xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd">
+  
+  <tlib-version>1.0</tlib-version>
+  <short-name>security</short-name>
+  <uri>http://scm.com/tags/security</uri>
+
+  <tag>
+    <name>authorize</name>
+    <tag-class>com.scm.security.tag.SecurityTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>
+      Tag for conditionally rendering content based on user roles and permissions.
+      Content inside the tag will only be rendered if the user meets the specified criteria.
+    </description>
+    
+    <attribute>
+      <name>hasRole</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+      <description>
+        Role that the user must have to view the content. Content will only be rendered
+        if the user has this specific role.
+      </description>
+    </attribute>
+    
+    <attribute>
+      <name>hasAnyRole</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+      <description>
+        Comma-separated list of roles. Content will be rendered if the user has any of these roles.
+      </description>
+    </attribute>
+    
+    <attribute>
+      <name>hasPermission</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+      <description>
+        Permission that the user must have to view the content.
+      </description>
+    </attribute>
+  </tag>
+</taglib> 
