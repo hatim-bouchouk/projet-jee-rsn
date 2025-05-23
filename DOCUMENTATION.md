@@ -497,4 +497,141 @@ Tag library for conditional rendering based on user roles and permissions:
 
 ## License
 
-This project is licensed under the MIT License. 
+This project is licensed under the MIT License.
+
+## Troubleshooting Guide
+
+### Common Issues and Solutions
+
+#### Authentication Filter Issues
+The application uses a security filter (`AuthenticationFilter`) that controls access to protected resources. If users are experiencing 404 errors or redirect loops:
+
+1. Check if the login page exists and is accessible
+2. Verify that public resources are correctly configured in the `PUBLIC_PATHS` set
+3. For debugging purposes, the filter can be temporarily disabled by modifying the `doFilter` method:
+   ```java
+   @Override
+   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+           throws IOException, ServletException {
+       
+       // Temporarily allow all requests to pass through without authentication
+       chain.doFilter(request, response);
+       
+       /* Original code commented out for debugging */
+   }
+   ```
+
+#### Database Connection Issues
+If the application fails to connect to the database:
+
+1. Verify database credentials in `database.properties` and `persistence.xml`
+2. Ensure MySQL service is running
+3. Check for connection pool configuration issues
+4. Look for ClassCastException errors related to HikariCP configuration (common issue with integer vs string values)
+
+#### Hibernate Configuration Issues
+Common Hibernate issues include:
+
+1. **ClassCastException**: When using HikariCP with Hibernate, ensure all connection pool parameters are provided as strings:
+   ```java
+   // Correct way to configure HikariCP in JPAUtil
+   properties.put("hibernate.hikari.minimumIdle", 
+           String.valueOf(DatabaseConfig.getIntProperty("db.pool.minIdle", 5)));
+   ```
+
+2. **Missing Cache Provider**: If you see errors related to missing cache providers like EhCache:
+   ```
+   Caused by: javax.cache.CacheException: Failed to load the CachingProvider [org.ehcache.jsr107.EhcacheCachingProvider]
+   ```
+   Either add the missing dependency or disable second-level caching in `persistence.xml`:
+   ```xml
+   <property name="hibernate.cache.use_second_level_cache" value="false" />
+   <property name="hibernate.cache.use_query_cache" value="false" />
+   ```
+
+#### Tomcat Deployment Issues
+When deploying to Tomcat:
+
+1. Ensure Tomcat is configured with the correct Java version
+2. Check port configuration in `server.xml` (default is 8080, but can be changed to 8090 or other)
+3. Verify that the WAR file is correctly deployed to the `webapps` directory
+4. Check Tomcat logs for startup errors:
+   - `catalina.out` - Main Tomcat log
+   - `localhost.log` - Application-specific errors
+
+### Diagnostic Process
+
+When troubleshooting the application, follow this systematic approach:
+
+1. **Check Tomcat Status**:
+   ```powershell
+   netstat -ano | findstr "8090"  # Check if Tomcat is listening on port 8090
+   ```
+
+2. **Verify MySQL Connection**:
+   ```powershell
+   Get-Service -Name "*mysql*"  # Check if MySQL service is running
+   ```
+
+3. **Review Application Logs**:
+   - Tomcat logs in `[TOMCAT_HOME]/logs/`
+   - Application-specific logs in `[TOMCAT_HOME]/logs/scm/`
+
+4. **Test Database Connection**:
+   - Use a database client to verify connection with the same credentials
+   - Check for database schema issues or missing tables
+
+5. **Verify Application Deployment**:
+   - Check if the application is deployed in `[TOMCAT_HOME]/webapps/scm/`
+   - Verify that all required resources are present
+
+6. **Browser Access Test**:
+   ```powershell
+   Invoke-WebRequest -Uri "http://localhost:8090/scm" -UseBasicParsing
+   ```
+
+### Environment-Specific Configuration
+
+The application supports different environments (development, test, production) through property files:
+
+- `application.properties` - Common settings
+- `application-development.properties` - Development-specific settings
+- `application-test.properties` - Test environment settings
+- `application-production.properties` - Production settings
+- `database.properties` - Database connection settings
+
+To change environments, modify the `spring.profiles.active` property in `application.properties`:
+```properties
+spring.profiles.active=development
+```
+
+### Recovery Steps
+
+If the application fails to start:
+
+1. Stop Tomcat and any running Java processes:
+   ```powershell
+   taskkill /F /IM java.exe /T
+   ```
+
+2. Clear Tomcat work directory:
+   ```powershell
+   Remove-Item -Path "[TOMCAT_HOME]/work/Catalina" -Recurse -Force
+   ```
+
+3. Rebuild and redeploy the application:
+   ```powershell
+   mvn clean package
+   Copy-Item -Path "target/scm.war" -Destination "[TOMCAT_HOME]/webapps/" -Force
+   ```
+
+4. Start Tomcat with clean environment:
+   ```powershell
+   cd "[TOMCAT_HOME]/bin"
+   .\startup.bat
+   ```
+
+5. Monitor logs for errors:
+   ```powershell
+   Get-Content -Path "[TOMCAT_HOME]/logs/catalina.out" -Wait
+   ``` 
