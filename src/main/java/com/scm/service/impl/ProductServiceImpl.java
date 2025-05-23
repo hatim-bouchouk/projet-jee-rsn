@@ -58,7 +58,7 @@ public class ProductServiceImpl implements ProductService {
             }
             
             return savedProduct;
-        } catch (ValidationException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error creating product", e);
@@ -86,7 +86,7 @@ public class ProductServiceImpl implements ProductService {
             
             // Update the product
             return productDao.update(product);
-        } catch (ValidationException | ServiceException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error updating product", e);
@@ -234,7 +234,7 @@ public class ProductServiceImpl implements ProductService {
             
             // Update the product
             return Optional.of(productDao.update(product));
-        } catch (ValidationException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error updating product price", e);
@@ -271,7 +271,7 @@ public class ProductServiceImpl implements ProductService {
             
             // Update the product
             return Optional.of(productDao.update(product));
-        } catch (ValidationException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error updating product reorder level", e);

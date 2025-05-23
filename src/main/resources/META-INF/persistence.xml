@@ -4,10 +4,12 @@
              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
              version="2.2">
     
-    <persistence-unit name="scmPU" transaction-type="JTA">
+    <persistence-unit name="scmPU" transaction-type="RESOURCE_LOCAL">
         <description>Supply Chain Management Persistence Unit</description>
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <jta-data-source>java:jboss/datasources/MySQLDS</jta-data-source>
+        
+        <!-- Use JNDI data source for production -->
+        <non-jta-data-source>java:comp/env/jdbc/scmDB</non-jta-data-source>
         
         <!-- Entity classes -->
         <class>com.scm.model.User</class>
@@ -22,35 +24,59 @@
         <class>com.scm.model.StockMovement</class>
         
         <properties>
-            <!-- Database connection settings -->
-            <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver" />
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/scm_db?useSSL=false&amp;serverTimezone=UTC" />
-            <property name="jakarta.persistence.jdbc.user" value="scm_user" />
-            <property name="jakarta.persistence.jdbc.password" value="scm_password" />
-            
-            <!-- Schema generation -->
-            <property name="jakarta.persistence.schema-generation.database.action" value="none" />
+            <!-- JDBC connection properties (used as fallback if JNDI is not available) -->
+            <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver" />
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/scm_db?useSSL=false&amp;serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;createDatabaseIfNotExist=true&amp;useUnicode=true&amp;characterEncoding=UTF-8" />
+            <property name="javax.persistence.jdbc.user" value="root" />
+            <property name="javax.persistence.jdbc.password" value="hatim2003" />
             
             <!-- Hibernate specific properties -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect" />
             <property name="hibernate.show_sql" value="true" />
             <property name="hibernate.format_sql" value="true" />
-            <property name="hibernate.hbm2ddl.auto" value="validate" />
+            <property name="hibernate.hbm2ddl.auto" value="update" />
             
-            <!-- Connection pooling properties -->
+            <!-- Connection pooling properties - HikariCP -->
             <property name="hibernate.connection.provider_class" value="org.hibernate.hikaricp.internal.HikariCPConnectionProvider" />
             <property name="hibernate.hikari.minimumIdle" value="5" />
-            <property name="hibernate.hikari.maximumPoolSize" value="10" />
+            <property name="hibernate.hikari.maximumPoolSize" value="20" />
             <property name="hibernate.hikari.idleTimeout" value="30000" />
             <property name="hibernate.hikari.connectionTimeout" value="30000" />
+            <property name="hibernate.hikari.leakDetectionThreshold" value="60000" />
+            <property name="hibernate.hikari.dataSource.cachePrepStmts" value="true" />
+            <property name="hibernate.hikari.dataSource.prepStmtCacheSize" value="250" />
+            <property name="hibernate.hikari.dataSource.prepStmtCacheSqlLimit" value="2048" />
+            <property name="hibernate.hikari.dataSource.useServerPrepStmts" value="true" />
+            
+            <!-- Connection validation -->
+            <property name="hibernate.connection.isolation" value="2" /> <!-- TRANSACTION_READ_COMMITTED -->
+            <property name="hibernate.connection.autocommit" value="false" />
+            <property name="hibernate.connection.provider_disables_autocommit" value="true" />
+            <property name="hibernate.connection.handling_mode" value="DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION" />
+            
+            <!-- Transaction management -->
+            <property name="hibernate.transaction.coordinator_class" value="jdbc" />
+            <property name="hibernate.current_session_context_class" value="thread" />
+            <property name="hibernate.transaction.jta.platform" value="org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform" />
             
             <!-- Cache settings -->
             <property name="hibernate.cache.use_second_level_cache" value="true" />
             <property name="hibernate.cache.use_query_cache" value="true" />
             <property name="hibernate.cache.region.factory_class" value="org.hibernate.cache.jcache.JCacheRegionFactory" />
+            <property name="hibernate.javax.cache.provider" value="org.ehcache.jsr107.EhcacheCachingProvider" />
+            <property name="hibernate.javax.cache.missing_cache_strategy" value="create" />
+            
+            <!-- Performance optimizations -->
+            <property name="hibernate.jdbc.batch_size" value="50" />
+            <property name="hibernate.order_inserts" value="true" />
+            <property name="hibernate.order_updates" value="true" />
+            <property name="hibernate.jdbc.batch_versioned_data" value="true" />
             
             <!-- Statistics and debugging -->
-            <property name="hibernate.generate_statistics" value="true" />
+            <property name="hibernate.generate_statistics" value="false" />
+            
+            <!-- Timezone handling -->
+            <property name="hibernate.jdbc.time_zone" value="UTC" />
         </properties>
     </persistence-unit>
 </persistence> 

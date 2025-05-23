@@ -1,7 +1,10 @@
 package com.scm.dao.impl;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.persistence.TypedQuery;
@@ -35,6 +38,22 @@ public class StockDaoImpl extends AbstractJpaDao<Stock, Integer> implements Stoc
         query.setParameter("sku", sku);
         
         return getSingleResult(query);
+    }
+    
+    @Override
+    public List<Stock> findByProductIds(Integer[] productIds) {
+        if (productIds == null || productIds.length == 0) {
+            return List.of();
+        }
+        
+        String idList = Arrays.stream(productIds)
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+        
+        TypedQuery<Stock> query = entityManager.createQuery(
+                "SELECT s FROM Stock s WHERE s.product.id IN (" + idList + ")", Stock.class);
+        
+        return query.getResultList();
     }
     
     @Override

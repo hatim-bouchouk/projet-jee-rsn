@@ -1,5 +1,6 @@
 package com.scm.dao;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.scm.model.Stock;
@@ -24,6 +25,14 @@ public interface StockDao extends GenericDao<Stock, Integer> {
      * @return Optional containing stock if found, empty otherwise
      */
     Optional<Stock> findByProductSku(String sku);
+    
+    /**
+     * Find stock for multiple product IDs
+     * 
+     * @param productIds Array of product IDs
+     * @return List of stock entities for the specified products
+     */
+    List<Stock> findByProductIds(Integer[] productIds);
     
     /**
      * Update stock quantity

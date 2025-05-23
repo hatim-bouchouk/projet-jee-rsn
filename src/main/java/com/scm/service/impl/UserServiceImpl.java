@@ -51,8 +51,8 @@ public class UserServiceImpl implements UserService {
         } catch (AuthenticationException e) {
             throw e;
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error during authentication", e);
-            throw new AuthenticationException("Authentication failed due to system error", e);
+            LOGGER.log(Level.SEVERE, "Error authenticating user", e);
+            throw new AuthenticationException("Authentication failed due to system error: " + e.getMessage());
         }
     }
     
@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
             
             // Save the user
             return userDao.save(user);
-        } catch (ValidationException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error creating user", e);
@@ -102,7 +102,7 @@ public class UserServiceImpl implements UserService {
             
             // Update the user
             return userDao.update(user);
-        } catch (ValidationException | ServiceException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error updating user", e);
@@ -151,7 +151,7 @@ public class UserServiceImpl implements UserService {
             userDao.update(user);
             
             return true;
-        } catch (AuthenticationException | ValidationException | ServiceException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error changing password", e);

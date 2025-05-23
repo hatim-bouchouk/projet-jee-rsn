@@ -45,6 +45,14 @@ public class SupplierProductId implements Serializable {
     public void setProduct(Integer product) {
         this.product = product;
     }
+    
+    public void setSupplierId(Integer supplierId) {
+        this.supplier = supplierId;
+    }
+    
+    public void setProductId(Integer productId) {
+        this.product = productId;
+    }
 
     @Override
     public boolean equals(Object o) {

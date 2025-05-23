@@ -36,7 +36,7 @@ public class SupplierOrder implements Serializable {
      * Enum for supplier order status.
      */
     public enum Status {
-        pending, placed, confirmed, shipped, delivered, cancelled
+        pending, placed, confirmed, shipped, delivered, cancelled, RECEIVED, COMPLETED
     }
 
     @Id

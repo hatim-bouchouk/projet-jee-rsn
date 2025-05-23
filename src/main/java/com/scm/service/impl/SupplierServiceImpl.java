@@ -53,7 +53,7 @@ public class SupplierServiceImpl implements SupplierService {
             
             // Save the supplier
             return supplierDao.save(supplier);
-        } catch (ValidationException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error creating supplier", e);
@@ -81,7 +81,7 @@ public class SupplierServiceImpl implements SupplierService {
             
             // Update the supplier
             return supplierDao.update(supplier);
-        } catch (ValidationException | ServiceException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error updating supplier", e);
@@ -243,7 +243,7 @@ public class SupplierServiceImpl implements SupplierService {
             
             // Save the association
             return supplierProductDao.save(supplierProduct);
-        } catch (ValidationException | ServiceException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error adding product to supplier", e);
@@ -266,7 +266,7 @@ public class SupplierServiceImpl implements SupplierService {
             
             // Update the association
             return supplierProductDao.update(supplierProduct);
-        } catch (ValidationException | ServiceException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error updating supplier product", e);

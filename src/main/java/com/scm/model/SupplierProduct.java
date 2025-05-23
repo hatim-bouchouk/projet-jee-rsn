@@ -2,6 +2,7 @@ package com.scm.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -11,6 +12,7 @@ import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -46,6 +48,9 @@ public class SupplierProduct implements Serializable {
     @Min(value = 1, message = "Lead time must be at least 1 day")
     @Column(name = "lead_time_days", nullable = false)
     private Integer leadTimeDays = 1;
+    
+    @Transient
+    private SupplierProductId id;
 
     /**
      * Default constructor
@@ -74,6 +79,23 @@ public class SupplierProduct implements Serializable {
     }
 
     // Getters and Setters
+    
+    public SupplierProductId getId() {
+        if (this.id == null) {
+            this.id = new SupplierProductId();
+            if (this.supplier != null) {
+                this.id.setSupplier(this.supplier.getId());
+            }
+            if (this.product != null) {
+                this.id.setProduct(this.product.getId());
+            }
+        }
+        return this.id;
+    }
+    
+    public void setId(SupplierProductId id) {
+        this.id = id;
+    }
 
     public Supplier getSupplier() {
         return supplier;
@@ -117,7 +139,7 @@ public class SupplierProduct implements Serializable {
         }
         
         BigDecimal profit = product.getUnitPrice().subtract(unitCost);
-        return profit.multiply(new BigDecimal("100")).divide(product.getUnitPrice(), 2, BigDecimal.ROUND_HALF_UP);
+        return profit.multiply(new BigDecimal("100")).divide(product.getUnitPrice(), 2, RoundingMode.HALF_UP);
     }
 
     @Override

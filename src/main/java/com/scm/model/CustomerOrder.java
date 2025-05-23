@@ -36,7 +36,7 @@ public class CustomerOrder implements Serializable {
      * Enum for order status.
      */
     public enum Status {
-        pending, processing, shipped, delivered, cancelled
+        pending, processing, shipped, delivered, cancelled, NEW, PROCESSING, PENDING, SHIPPED, DELIVERED, CANCELLED, COMPLETED, PAID
     }
 
     @Id
@@ -52,6 +52,15 @@ public class CustomerOrder implements Serializable {
     @Email(message = "Email should be valid")
     @Column(name = "customer_email", length = 100, nullable = false)
     private String customerEmail;
+    
+    @Column(name = "customer_phone", length = 20)
+    private String customerPhone;
+    
+    @Column(name = "shipping_address", length = 255)
+    private String shippingAddress;
+    
+    @Column(name = "notes", length = 500)
+    private String notes;
 
     @Column(name = "order_date", nullable = false, updatable = false)
     private LocalDateTime orderDate;
@@ -122,6 +131,30 @@ public class CustomerOrder implements Serializable {
 
     public void setCustomerEmail(String customerEmail) {
         this.customerEmail = customerEmail;
+    }
+    
+    public String getCustomerPhone() {
+        return customerPhone;
+    }
+    
+    public void setCustomerPhone(String customerPhone) {
+        this.customerPhone = customerPhone;
+    }
+    
+    public String getShippingAddress() {
+        return shippingAddress;
+    }
+    
+    public void setShippingAddress(String shippingAddress) {
+        this.shippingAddress = shippingAddress;
+    }
+    
+    public String getNotes() {
+        return notes;
+    }
+    
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
     public LocalDateTime getOrderDate() {
@@ -204,6 +237,8 @@ public class CustomerOrder implements Serializable {
                 "id=" + id +
                 ", customerName='" + customerName + '\'' +
                 ", customerEmail='" + customerEmail + '\'' +
+                ", customerPhone='" + customerPhone + '\'' +
+                ", shippingAddress='" + shippingAddress + '\'' +
                 ", orderDate=" + orderDate +
                 ", status=" + status +
                 ", totalAmount=" + totalAmount +

@@ -60,24 +60,25 @@ The SCM database consists of 10 interconnected tables designed to manage all asp
              |                         +---------------------+
              |                         | id                  |
              |                         | customer_name       |
-     +---------------+                 | customer_email      |
-     | supplier_     |                 | order_date          |
-     | products      |                 | status              |
-     +---------------+                 | total_amount        |
-     | supplier_id(FK|                 | order_date          |
-     | product_id(FK)|                 | status              |
-     | unit_cost     |                 | total_amount        |
-     | lead_time_days|              +--------------------+
-     +---------------+              |     order_items    |
-             ^                      +--------------------+
-             |                      | id                 |
-             |                      | order_id (FK)      |
-   +--------------------+           | product_id (FK)    |
-   |  supplier_orders   |           | quantity           |
-   +--------------------+           | unit_price         |
-   | id                 |           +--------------------+
-   | supplier_id (FK)   |
-   | order_date         |           
+             |                         | customer_email      |
+     +---------------+                 | order_date          |
+     | supplier_     |                 | status              |
+     | products      |                 | total_amount        |
+     +---------------+                 | order_date          |
+     | supplier_id(FK|                 | status              |
+     | product_id(FK)|                 | total_amount        |
+     | unit_cost     |                 +--------------------+
+     | lead_time_days|                        ^
+     +---------------+                        |
+             ^                         +--------------------+
+             |                         |     order_items    |
+             |                         +--------------------+
+   +--------------------+              | id                 |
+   |  supplier_orders   |              | order_id (FK)      |
+   +--------------------+              | product_id (FK)    |
+   | id                 |              | quantity           |
+   | supplier_id (FK)   |              | unit_price         |
+   | order_date         |              +--------------------+
    | status             |
    | total_amount       |
    | expected_delivery  |
@@ -182,15 +183,88 @@ FLUSH PRIVILEGES;
 
 ### 3. Running the Schema Scripts
 
-1. Run the schema creation script first:
-```bash
-mysql -u scm_user -p scm_db < schema.sql
-```
+The database schema is automatically created by JPA/Hibernate when the application starts. The `DatabaseInitializer` class handles this process.
 
-2. Then load the sample data (optional):
-```bash
-mysql -u scm_user -p scm_db < sample_data.sql
-```
+## Sample Data
+
+The `init_data.sql` file contains sample data to populate the database with test records. This includes:
+
+### Users
+
+Three default user accounts are created with the following credentials:
+
+| Username | Password   | Role    | Email             |
+|----------|------------|---------|-------------------|
+| admin    | admin123   | admin   | admin@scm.com     |
+| manager  | manager123 | manager | manager@scm.com   |
+| client   | client123  | user    | client@scm.com    |
+
+**Note:** The passwords are stored in BCrypt hashed format for security. The plaintext passwords shown above are only for development and testing purposes.
+
+### Products
+
+Ten sample products are created with different stock levels:
+- Some products are intentionally set with stock levels below their reorder points to test low stock alerts
+- Products include electronics and accessories with various prices and reorder levels
+
+### Suppliers
+
+Four sample suppliers are created with contact information and addresses.
+
+### Supplier-Product Relationships
+
+The sample data establishes relationships between suppliers and products, including:
+- Multiple suppliers for some products to test alternate sourcing
+- Different lead times and costs for each supplier-product relationship
+
+### Customer Orders
+
+Five sample customer orders are created with different statuses:
+- Delivered orders
+- Shipped orders
+- Processing orders
+- Pending orders
+- New orders
+
+### Supplier Orders
+
+Four sample supplier orders are created with different statuses:
+- Delivered orders
+- Shipped orders
+- Pending orders
+
+### Stock Movements
+
+Various stock movement records are created to demonstrate different inventory transactions:
+- Purchases from suppliers
+- Sales to customers
+- Inventory adjustments
+- Customer returns
+- Damaged/waste items
+
+## Password Hashing
+
+User passwords are hashed using BCrypt, a secure password hashing algorithm. The hashed passwords in the sample data are:
+
+- admin:admin123 = `$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqaFS`
+- manager:manager123 = `$2a$10$FKdvC4NZ5/3hx.A.Z.yfO.KeUuV.crs5g4eAoR.I6NQnoGiIUCnxy`
+- client:client123 = `$2a$10$UYrGNY9bT2TQC8A.Ql8jR.Xf0aYLxFG4KgbBy5GqB.NJA1CV1nKZ2`
+
+BCrypt is used because it:
+1. Incorporates a salt to protect against rainbow table attacks
+2. Is an adaptive function that can be made slower as hardware gets faster
+3. Is widely recognized as a secure password hashing algorithm
+
+## Database Initialization Process
+
+The database is initialized automatically when the application starts through the `DatabaseInitializer` class, which:
+
+1. Checks if database initialization is enabled in the configuration
+2. Creates/updates the database schema using JPA/Hibernate
+3. Checks if sample data initialization is enabled
+4. If no users exist in the database, executes the `init_data.sql` script to populate sample data
+
+This process ensures that the application has the necessary database structure and sample data for testing and development.
 
 ## Data Relationships and Business Rules
 
@@ -232,3 +306,101 @@ The schema includes indexes on frequently queried columns to improve performance
 - User passwords are stored using bcrypt hashing
 - Database user permissions should be restricted based on application needs
 - Consider encrypting sensitive supplier and customer information 
+
+# Database Initialization and Sample Data
+
+This directory contains SQL scripts and resources for initializing the Supply Chain Management (SCM) database.
+
+## Schema Creation
+
+The `schema.sql` file contains the SQL statements to create all necessary tables, indexes, and constraints for the SCM system. This includes:
+
+- Users table for authentication and authorization
+- Products table for inventory management
+- Suppliers table for vendor information
+- Stock table for current inventory levels
+- Customer Orders and Order Items tables for sales tracking
+- Supplier Orders and Supplier Order Items tables for purchase tracking
+- Stock Movements table for inventory transaction history
+- Supplier Products table for product-supplier relationships
+
+## Sample Data
+
+The `init_data.sql` file contains sample data to populate the database with test records. This includes:
+
+### Users
+
+Three default user accounts are created with the following credentials:
+
+| Username | Password   | Role    | Email             |
+|----------|------------|---------|-------------------|
+| admin    | admin123   | admin   | admin@scm.com     |
+| manager  | manager123 | manager | manager@scm.com   |
+| client   | client123  | user    | client@scm.com    |
+
+**Note:** The passwords are stored in BCrypt hashed format for security. The plaintext passwords shown above are only for development and testing purposes.
+
+### Products
+
+Ten sample products are created with different stock levels:
+- Some products are intentionally set with stock levels below their reorder points to test low stock alerts
+- Products include electronics and accessories with various prices and reorder levels
+
+### Suppliers
+
+Four sample suppliers are created with contact information and addresses.
+
+### Supplier-Product Relationships
+
+The sample data establishes relationships between suppliers and products, including:
+- Multiple suppliers for some products to test alternate sourcing
+- Different lead times and costs for each supplier-product relationship
+
+### Customer Orders
+
+Five sample customer orders are created with different statuses:
+- Delivered orders
+- Shipped orders
+- Processing orders
+- Pending orders
+- New orders
+
+### Supplier Orders
+
+Four sample supplier orders are created with different statuses:
+- Delivered orders
+- Shipped orders
+- Pending orders
+
+### Stock Movements
+
+Various stock movement records are created to demonstrate different inventory transactions:
+- Purchases from suppliers
+- Sales to customers
+- Inventory adjustments
+- Customer returns
+- Damaged/waste items
+
+## Password Hashing
+
+User passwords are hashed using BCrypt, a secure password hashing algorithm. The hashed passwords in the sample data are:
+
+- admin:admin123 = `$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqaFS`
+- manager:manager123 = `$2a$10$FKdvC4NZ5/3hx.A.Z.yfO.KeUuV.crs5g4eAoR.I6NQnoGiIUCnxy`
+- client:client123 = `$2a$10$UYrGNY9bT2TQC8A.Ql8jR.Xf0aYLxFG4KgbBy5GqB.NJA1CV1nKZ2`
+
+BCrypt is used because it:
+1. Incorporates a salt to protect against rainbow table attacks
+2. Is an adaptive function that can be made slower as hardware gets faster
+3. Is widely recognized as a secure password hashing algorithm
+
+## Database Initialization Process
+
+The database is initialized automatically when the application starts through the `DatabaseInitializer` class, which:
+
+1. Checks if database initialization is enabled in the configuration
+2. Creates/updates the database schema using JPA/Hibernate
+3. Checks if sample data initialization is enabled
+4. If no users exist in the database, executes the `init_data.sql` script to populate sample data
+
+This process ensures that the application has the necessary database structure and sample data for testing and development. 

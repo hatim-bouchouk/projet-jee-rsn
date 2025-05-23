@@ -1,9 +1,7 @@
 package com.scm.service.impl;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -152,7 +150,7 @@ public class StockServiceImpl implements StockService {
             
             // Update stock record
             return Optional.of(stockDao.update(stock));
-        } catch (ValidationException | ServiceException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error updating stock quantity", e);
@@ -271,7 +269,7 @@ public class StockServiceImpl implements StockService {
             
             // The most recent movement will be the one we just created
             return movements.get(0);
-        } catch (ValidationException | ServiceException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error creating stock adjustment", e);
@@ -333,7 +331,7 @@ public class StockServiceImpl implements StockService {
             customerOrderDao.update(order);
             
             return true;
-        } catch (ValidationException | ServiceException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error processing stock for customer order", e);
@@ -364,7 +362,7 @@ public class StockServiceImpl implements StockService {
             }
             
             // Get order items
-            List<SupplierOrderItem> orderItems = supplierOrderItemDao.findByOrderId(supplierOrderId);
+            List<SupplierOrderItem> orderItems = supplierOrderItemDao.findBySupplierOrderId(supplierOrderId);
             if (orderItems.isEmpty()) {
                 throw new ServiceException("Supplier order has no items");
             }
@@ -385,7 +383,7 @@ public class StockServiceImpl implements StockService {
             supplierOrderDao.update(order);
             
             return true;
-        } catch (ValidationException | ServiceException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error processing stock for supplier order", e);

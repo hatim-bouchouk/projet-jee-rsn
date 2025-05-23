@@ -77,7 +77,7 @@ public class OrderServiceImpl implements OrderService {
             updateOrderTotal(savedOrder.getId());
             
             return customerOrderDao.findById(savedOrder.getId()).orElse(savedOrder);
-        } catch (ValidationException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error creating order", e);
@@ -110,7 +110,7 @@ public class OrderServiceImpl implements OrderService {
             updateOrderTotal(updatedOrder.getId());
             
             return customerOrderDao.findById(updatedOrder.getId()).orElse(updatedOrder);
-        } catch (ValidationException | ServiceException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error updating order", e);
@@ -183,7 +183,7 @@ public class OrderServiceImpl implements OrderService {
             } else {
                 return Optional.empty();
             }
-        } catch (ValidationException | ServiceException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error updating order status", e);
@@ -242,11 +242,11 @@ public class OrderServiceImpl implements OrderService {
             updateOrderTotal(orderId);
             
             return savedItem;
-        } catch (ValidationException | ServiceException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error adding order item", e);
-            throw new ServiceException("Failed to add order item", e);
+            LOGGER.log(Level.SEVERE, "Error adding item to order", e);
+            throw new ServiceException("Failed to add item to order", e);
         }
     }
     
@@ -286,7 +286,7 @@ public class OrderServiceImpl implements OrderService {
             updateOrderTotal(order.getId());
             
             return updatedItem;
-        } catch (ValidationException | ServiceException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error updating order item", e);
@@ -325,11 +325,11 @@ public class OrderServiceImpl implements OrderService {
             } else {
                 return false;
             }
-        } catch (ValidationException | ServiceException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error removing order item", e);
-            throw new ServiceException("Failed to remove order item", e);
+            LOGGER.log(Level.SEVERE, "Error removing item from order", e);
+            throw new ServiceException("Failed to remove item from order", e);
         }
     }
     
@@ -455,7 +455,7 @@ public class OrderServiceImpl implements OrderService {
             customerOrderDao.update(order);
             
             return true;
-        } catch (ValidationException | ServiceException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error processing payment", e);
@@ -504,7 +504,7 @@ public class OrderServiceImpl implements OrderService {
             String trackingNumber = "TRK" + System.currentTimeMillis() + orderId;
             
             return trackingNumber;
-        } catch (ValidationException | ServiceException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error processing shipment", e);
@@ -533,6 +533,8 @@ public class OrderServiceImpl implements OrderService {
             
             order.setTotalAmount(total);
             customerOrderDao.update(order);
+        } catch (ServiceException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error updating order total", e);
             throw new ServiceException("Failed to update order total", e);
@@ -647,27 +649,36 @@ public class OrderServiceImpl implements OrderService {
     private void validateStatusTransition(Status currentStatus, Status newStatus) throws ValidationException {
         // Valid transitions
         switch (currentStatus) {
+            case pending:
             case PENDING:
-                if (newStatus != Status.PROCESSING && newStatus != Status.PAID && newStatus != Status.CANCELLED) {
+                if (newStatus != Status.processing && newStatus != Status.PROCESSING && 
+                    newStatus != Status.CANCELLED) {
                     throw new ValidationException("Invalid status transition from " + currentStatus + " to " + newStatus);
                 }
                 break;
+            case processing:
             case PROCESSING:
-                if (newStatus != Status.SHIPPED && newStatus != Status.CANCELLED) {
+                if (newStatus != Status.shipped && newStatus != Status.SHIPPED && 
+                    newStatus != Status.cancelled && newStatus != Status.CANCELLED) {
                     throw new ValidationException("Invalid status transition from " + currentStatus + " to " + newStatus);
                 }
                 break;
             case PAID:
-                if (newStatus != Status.PROCESSING && newStatus != Status.SHIPPED && newStatus != Status.CANCELLED) {
+                if (newStatus != Status.processing && newStatus != Status.PROCESSING && 
+                    newStatus != Status.shipped && newStatus != Status.SHIPPED && 
+                    newStatus != Status.cancelled && newStatus != Status.CANCELLED) {
                     throw new ValidationException("Invalid status transition from " + currentStatus + " to " + newStatus);
                 }
                 break;
+            case shipped:
             case SHIPPED:
-                if (newStatus != Status.DELIVERED) {
+                if (newStatus != Status.delivered && newStatus != Status.DELIVERED) {
                     throw new ValidationException("Invalid status transition from " + currentStatus + " to " + newStatus);
                 }
                 break;
+            case delivered:
             case DELIVERED:
+            case cancelled:
             case CANCELLED:
                 throw new ValidationException("Cannot change status from " + currentStatus);
             default:

@@ -21,8 +21,9 @@ public interface UserService {
      * @param password Password (plain text)
      * @return Authenticated user
      * @throws AuthenticationException if authentication fails
+     * @throws ServiceException if a system error occurs
      */
-    User authenticate(String username, String password) throws AuthenticationException;
+    User authenticate(String username, String password) throws AuthenticationException, ServiceException;
     
     /**
      * Create a new user

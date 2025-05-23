@@ -55,6 +55,9 @@ public class Product implements Serializable {
     @Column(name = "reorder_level", nullable = false)
     private Integer reorderLevel;
 
+    @Column(name = "product_type", length = 50)
+    private String productType;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -153,6 +156,14 @@ public class Product implements Serializable {
 
     public void setReorderLevel(Integer reorderLevel) {
         this.reorderLevel = reorderLevel;
+    }
+
+    public String getProductType() {
+        return productType;
+    }
+
+    public void setProductType(String productType) {
+        this.productType = productType;
     }
 
     public LocalDateTime getCreatedAt() {

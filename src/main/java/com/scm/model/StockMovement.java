@@ -29,7 +29,7 @@ public class StockMovement implements Serializable {
      * Enum for movement types.
      */
     public enum MovementType {
-        purchase, sale, adjustment, return_item, waste;
+        purchase, sale, adjustment, return_item, waste, ADJUSTMENT, CUSTOMER_ORDER, SUPPLIER_ORDER;
 
         // To handle the database enum value 'return' which is a Java keyword
         public String getValue() {
@@ -68,6 +68,9 @@ public class StockMovement implements Serializable {
 
     @Column(name = "movement_date", nullable = false, updatable = false)
     private LocalDateTime movementDate;
+    
+    @Column(name = "notes")
+    private String notes;
 
     /**
      * Default constructor
@@ -146,6 +149,14 @@ public class StockMovement implements Serializable {
     public void setMovementDate(LocalDateTime movementDate) {
         this.movementDate = movementDate;
     }
+    
+    public String getNotes() {
+        return notes;
+    }
+    
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
 
     /**
      * Check if this movement is incoming (increases stock)
@@ -190,6 +201,7 @@ public class StockMovement implements Serializable {
                 ", quantity=" + quantity +
                 ", referenceId=" + referenceId +
                 ", movementDate=" + movementDate +
+                ", notes=" + notes +
                 '}';
     }
 } 

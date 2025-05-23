@@ -1,6 +1,7 @@
 package com.scm.service.impl;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -91,7 +92,7 @@ public class DashboardServiceImpl implements DashboardService {
             }
             
             if (orderCount > 0) {
-                averageOrderValue = totalSales.divide(BigDecimal.valueOf(orderCount), 2, BigDecimal.ROUND_HALF_UP);
+                averageOrderValue = totalSales.divide(BigDecimal.valueOf(orderCount), 2, RoundingMode.HALF_UP);
             }
             
             // Count orders by status
@@ -107,7 +108,7 @@ public class DashboardServiceImpl implements DashboardService {
             // Calculate daily sales average
             long daysBetween = ChronoUnit.DAYS.between(startDate.toLocalDate(), endDate.toLocalDate()) + 1;
             if (daysBetween > 0) {
-                BigDecimal dailyAverage = totalSales.divide(BigDecimal.valueOf(daysBetween), 2, BigDecimal.ROUND_HALF_UP);
+                BigDecimal dailyAverage = totalSales.divide(BigDecimal.valueOf(daysBetween), 2, RoundingMode.HALF_UP);
                 statistics.put("dailyAverageSales", dailyAverage);
             }
             

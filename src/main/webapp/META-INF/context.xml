@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/scm" reloadable="true" antiJARLocking="true" antiResourceLocking="true">
+    <!-- Configure connection pool -->
+    <Resource name="jdbc/scmDB" 
+              auth="Container" 
+              type="javax.sql.DataSource"
+              maxTotal="100" 
+              maxIdle="30" 
+              maxWaitMillis="10000"
+              username="root" 
+              password="hatim2003" 
+              driverClassName="com.mysql.cj.jdbc.Driver"
+              url="jdbc:mysql://localhost:3306/scm_db?useSSL=false&amp;serverTimezone=UTC"
+              validationQuery="SELECT 1"
+              testOnBorrow="true"
+              removeAbandonedOnBorrow="true"
+              removeAbandonedTimeout="60"/>
+              
+    <!-- Session persistence configuration -->
+    <Manager pathname="SESSIONS.ser" />
+    
+    <!-- JNDI Environment entries -->
+    <Environment name="applicationName" value="Supply Chain Management System" type="java.lang.String" override="false"/>
+    <Environment name="logLevel" value="INFO" type="java.lang.String" override="false"/>
+</Context> 
