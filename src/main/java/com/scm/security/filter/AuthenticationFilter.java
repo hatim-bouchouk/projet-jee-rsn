@@ -32,7 +32,8 @@ public class AuthenticationFilter implements Filter {
     
     // Paths that don't require authentication
     private static final Set<String> PUBLIC_PATHS = Collections.unmodifiableSet(new HashSet<>(
-            Arrays.asList("/login", "/logout", "/register", "/error", "/access-denied", "/resources", "/assets")));
+            Arrays.asList("/login", "/logout", "/register", "/error", "/access-denied", "/resources", "/assets", 
+                        "/index.jsp", "/jsp/common", "/.js", "/.css", "/.png", "/.jpg", "/.gif", "/favicon.ico")));
     
     // Resources that require specific roles
     private static final Set<String> ADMIN_PATHS = Collections.unmodifiableSet(new HashSet<>(
@@ -50,10 +51,6 @@ public class AuthenticationFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         
-        // Temporarily allow all requests to pass through without authentication
-        chain.doFilter(request, response);
-        
-        /* Original code commented out for debugging
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         
@@ -86,7 +83,6 @@ public class AuthenticationFilter implements Filter {
         
         // All checks passed, continue the filter chain
         chain.doFilter(request, response);
-        */
     }
 
     @Override

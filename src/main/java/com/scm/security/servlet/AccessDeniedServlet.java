@@ -39,7 +39,7 @@ public class AccessDeniedServlet extends HttpServlet {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         
         // Forward to the access denied page
-        request.getRequestDispatcher("/WEB-INF/views/access-denied.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/access-denied.jsp").forward(request, response);
     }
     
     /**

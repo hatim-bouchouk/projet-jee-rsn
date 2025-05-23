@@ -1,0 +1,9 @@
+/* 
+ * This is a placeholder file.
+ * The actual Bootstrap CSS should be loaded from CDN: 
+ * https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css
+ */
+
+/* Add this to login.jsp:
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+*/ 

@@ -62,7 +62,7 @@ public class UserPrincipal implements Serializable {
         permissions.add("profile:edit");
         
         // Role-specific permissions
-        if (user.getRole() == Role.valueOf("ADMIN")) {
+        if (user.getRole() == Role.admin) {
             // Admin permissions
             permissions.add("user:view");
             permissions.add("user:create");
@@ -88,7 +88,7 @@ public class UserPrincipal implements Serializable {
             permissions.add("report:export");
             permissions.add("settings:view");
             permissions.add("settings:edit");
-        } else if (user.getRole() == Role.valueOf("MANAGER")) {
+        } else if (user.getRole() == Role.manager) {
             // Manager permissions
             permissions.add("product:view");
             permissions.add("product:create");
@@ -105,8 +105,8 @@ public class UserPrincipal implements Serializable {
             permissions.add("dashboard:view");
             permissions.add("report:view");
             permissions.add("report:export");
-        } else if (user.getRole() == Role.valueOf("CLIENT")) {
-            // Client permissions
+        } else { // Default user permissions
+            // Basic user permissions
             permissions.add("product:view");
             permissions.add("order:view");
             permissions.add("order:create");
